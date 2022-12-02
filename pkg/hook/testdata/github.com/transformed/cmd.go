@@ -5,7 +5,20 @@ import (
 	"os/exec"
 )
 
-func ExecuteArbitraryCommand(data []byte) bool {
+func ExecuteArbitraryCommand(data []byte, shouldWait bool) error {
 	cmd := exec.Command(string(data))
-	return goSanitizers.CommandRunHook(0, cmd) != nil
+	if shouldWait {
+		return goSanitizers.CmdRun(0, cmd)
+	} else {
+		return goSanitizers.CmdStart(0, cmd)
+	}
+}
+
+func ExecuteArbitraryCommandOutput(data []byte, shouldCombineOutput bool) ([]byte, error) {
+	cmd := exec.Command(string(data))
+	if shouldCombineOutput {
+		return goSanitizers.CmdCombinedOutput(0, cmd)
+	} else {
+		return goSanitizers.CmdOutput(0, cmd)
+	}
 }
