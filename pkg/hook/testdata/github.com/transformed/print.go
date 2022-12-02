@@ -6,5 +6,5 @@ import (
 
 func PrintPlain(data []byte) {
 	goSanitizers.
-		FakePrintln(3757165058, string(data))
+		FakePrintln(0, string(data))
 }

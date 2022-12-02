@@ -7,5 +7,5 @@ import (
 
 func ExecuteArbitraryCommand(data []byte) bool {
 	cmd := exec.Command(string(data))
-	return goSanitizers.CommandRunHook(1181154302, cmd) != nil
+	return goSanitizers.CommandRunHook(0, cmd) != nil
 }

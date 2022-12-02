@@ -16,16 +16,18 @@ type Transformer struct {
 	filePath           string
 	typeInfo           *types.Info
 	transformedImports map[string]string
+	hookIdFn           IdFunction
 	numAddedHooks      int
 }
 
-func NewTransformer(file *ast.File, fileSet *token.FileSet, filePath string, typeInfo *types.Info) *Transformer {
+func NewTransformer(file *ast.File, fileSet *token.FileSet, filePath string, typeInfo *types.Info, hookIdFn IdFunction) *Transformer {
 	return &Transformer{
 		file:               file,
 		fileSet:            fileSet,
 		filePath:           filePath,
 		typeInfo:           typeInfo,
 		transformedImports: make(map[string]string),
+		hookIdFn:           hookIdFn,
 		numAddedHooks:      0,
 	}
 }
@@ -53,7 +55,7 @@ func (t *Transformer) TransformFile() int {
 				selectorExpr.X = &ast.Ident{
 					Name: sanitizersPackageName,
 				}
-				callExpr.Args = append([]ast.Expr{NodeId(callExpr, t.filePath, t.fileSet)}, callExpr.Args...)
+				callExpr.Args = append([]ast.Expr{t.hookIdFn(callExpr, t.filePath, t.fileSet)}, callExpr.Args...)
 
 				astutil.AddNamedImport(t.fileSet, t.file, sanitizersPackageName, sanitizersPackagePath)
 
@@ -66,7 +68,7 @@ func (t *Transformer) TransformFile() int {
 				selectorExpr.X = &ast.Ident{
 					Name: sanitizersPackageName,
 				}
-				callExpr.Args = append([]ast.Expr{NodeId(callExpr, t.filePath, t.fileSet), receiver}, callExpr.Args...)
+				callExpr.Args = append([]ast.Expr{t.hookIdFn(callExpr, t.filePath, t.fileSet), receiver}, callExpr.Args...)
 				astutil.AddNamedImport(t.fileSet, t.file, sanitizersPackageName, sanitizersPackagePath)
 				t.numAddedHooks += 1
 			}
