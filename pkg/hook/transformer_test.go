@@ -2,7 +2,9 @@ package hook_test
 
 import (
 	"bytes"
+	"go/ast"
 	"go/format"
+	"go/token"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -17,7 +19,15 @@ import (
 	"github.com/CodeIntelligenceTesting/gofuzz/pkg/hook"
 )
 
+func mockFakePC(n ast.Node, file string, fSet *token.FileSet) *ast.BasicLit {
+	return &ast.BasicLit{
+		Kind:  token.INT,
+		Value: "0",
+	}
+}
+
 func TestTransformer(t *testing.T) { packagestest.TestAll(t, testTransformer) }
+
 func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 	hook.RegisterDefaultHooks()
 	hook.RegisterFunctionHook("Println", "fmt", "FakePrintln")
@@ -61,7 +71,7 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 		for i, file := range pkg.Syntax {
 			origFile := filepath.Base(pkg.CompiledGoFiles[i])
 
-			transformer := hook.NewTransformer(file, pkg.Fset, origFile, pkg.TypesInfo)
+			transformer := hook.NewTransformer(file, pkg.Fset, origFile, pkg.TypesInfo, mockFakePC)
 			transformed := transformer.TransformFile()
 			assert.Equal(t, transformed, transformed)
 

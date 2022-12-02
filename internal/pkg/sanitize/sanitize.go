@@ -42,7 +42,7 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 		}
 		for i, sourceFile := range pkg.Syntax {
 			originalSourceFile := pkg.CompiledGoFiles[i]
-			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo)
+			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo, hook.NodeId)
 			if numHooks := transformer.TransformFile(); numHooks > 0 {
 				rel, err := fileutil.RelativePathInModule(pkg.Module.Dir, originalSourceFile)
 				if err != nil {

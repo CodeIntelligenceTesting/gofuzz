@@ -1,5 +1,10 @@
 package hook
 
+import (
+	"go/ast"
+	"go/token"
+)
+
 const (
 	sanitizersPackagePath = "github.com/CodeIntelligenceTesting/gofuzz/sanitizers"
 	sanitizersPackageName = "goSanitizers"
@@ -21,3 +26,5 @@ type Hooks struct {
 	Functions []FunctionHook
 	Methods   []MethodHook
 }
+
+type IdFunction = func(n ast.Node, file string, fSet *token.FileSet) *ast.BasicLit

@@ -8,7 +8,7 @@ import (
 func PrintFormatted(format string, data []byte) {
 	if format == "" {
 		goSanitizers.
-			FakePrintln(920984872, string(data))
+			FakePrintln(0, string(data))
 	} else {
 		fmt.Printf(format, string(data))
 	}
