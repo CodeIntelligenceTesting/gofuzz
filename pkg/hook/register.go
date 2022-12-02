@@ -22,8 +22,7 @@ func RegisterMethodHook(methodName, receiverType, hookName string) {
 }
 
 func RegisterDefaultHooks() {
-	RegisterMethodHook("Run", "*os/exec.Cmd", "CommandRunHook")
-
+	// Hooks for SQL injection bugs
 	RegisterMethodHook("ExecContext", "*database/sql.Conn", "ConnExecContext")
 	RegisterMethodHook("PrepareContext", "*database/sql.Conn", "ConnPrepareContext")
 	RegisterMethodHook("QueryContext", "*database/sql.Conn", "ConnQueryContext")
@@ -53,4 +52,10 @@ func RegisterDefaultHooks() {
 	RegisterMethodHook("QueryContext", "*database/sql.Tx", "TxQueryContext")
 	RegisterMethodHook("QueryRow", "*database/sql.Tx", "TxQueryRow")
 	RegisterMethodHook("QueryRowContext", "*database/sql.Tx", "TxQueryRowContext")
+
+	// Hooks for command injections bugs
+	RegisterMethodHook("CombinedOutput", "*os/exec.Cmd", "CmdCombinedOutput")
+	RegisterMethodHook("Output", "*os/exec.Cmd", "CmdOutput")
+	RegisterMethodHook("Run", "*os/exec.Cmd", "CmdRun")
+	RegisterMethodHook("Start", "*os/exec.Cmd", "CmdStart")
 }
