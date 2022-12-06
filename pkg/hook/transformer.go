@@ -89,6 +89,7 @@ func (t *Transformer) removeUnusedImport() {
 }
 
 func importedPackage(expr ast.Expr, file *ast.File) (name string, path string, found bool) {
+	// the package part of function call expressions (e.g., os.Open()) is an identifier
 	ident, ok := expr.(*ast.Ident)
 	if !ok {
 		return "", "", false
