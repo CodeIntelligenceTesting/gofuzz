@@ -44,10 +44,7 @@ func (t *Transformer) TransformFile() int {
 			return true
 		}
 
-		receiver, ok := selectorExpr.X.(*ast.Ident)
-		if !ok {
-			return true
-		}
+		receiver := selectorExpr.X
 
 		if pkgName, pkgPath, ok := importedPackage(receiver, t.file); ok {
 			if h := MatchingFunctionHook(selectorExpr.Sel.Name, pkgPath); h != nil {
@@ -62,7 +59,7 @@ func (t *Transformer) TransformFile() int {
 				t.transformedImports[pkgPath] = pkgName
 				t.numAddedHooks += 1
 			}
-		} else if receiverType := t.typeInfo.Types[receiver]; receiverType.Addressable() {
+		} else if receiverType := t.typeInfo.Types[receiver]; receiverType.IsValue() {
 			if h := MatchingMethodHook(selectorExpr.Sel.Name, receiverType.Type.String()); h != nil {
 				selectorExpr.Sel.Name = h.HookName
 				selectorExpr.X = &ast.Ident{
@@ -91,7 +88,11 @@ func (t *Transformer) removeUnusedImport() {
 	}
 }
 
-func importedPackage(ident *ast.Ident, file *ast.File) (name string, path string, found bool) {
+func importedPackage(expr ast.Expr, file *ast.File) (name string, path string, found bool) {
+	ident, ok := expr.(*ast.Ident)
+	if !ok {
+		return "", "", false
+	}
 	// package identifiers should top-level unresolved identifiers
 	if ident.Obj != nil {
 		return "", "", false
