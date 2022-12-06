@@ -49,6 +49,7 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 				"cmd.go":    load("testdata/github.com/initial/cmd.go"),
 				"print.go":  load("testdata/github.com/initial/print.go"),
 				"printf.go": load("testdata/github.com/initial/printf.go"),
+				"sql.go":    load("testdata/github.com/initial/sql.go"),
 			},
 		},
 		{
@@ -57,6 +58,7 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 				"cmd.go":    load("testdata/github.com/transformed/cmd.go"),
 				"print.go":  load("testdata/github.com/transformed/print.go"),
 				"printf.go": load("testdata/github.com/transformed/printf.go"),
+				"sql.go":    load("testdata/github.com/transformed/sql.go"),
 			},
 		},
 	})

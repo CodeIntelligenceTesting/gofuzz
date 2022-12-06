@@ -9,7 +9,7 @@ const evilCommand = "evil_command"
 
 func CommandRunHook(hookId int, cmd *exec.Cmd) error {
 	if filepath.Base(cmd.Path) == evilCommand {
-		panic("Command Injection Detected")
+		ReportFinding("Command Injection")
 	} else {
 		GuideTowardsEquality(cmd.Path, evilCommand, hookId)
 	}
