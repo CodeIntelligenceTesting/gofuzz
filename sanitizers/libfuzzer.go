@@ -11,6 +11,10 @@ import (
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void __sanitizer_weak_hook_strcmp(uintptr_t called_pc, const char *s1,
+                                  const char *s2, int result);
+
 void __sanitizer_weak_hook_strstr(uintptr_t caller_pc, const char *s1,
                                  const char *s2, const char *result);
 #ifdef __cplusplus
@@ -19,13 +23,26 @@ void __sanitizer_weak_hook_strstr(uintptr_t caller_pc, const char *s1,
 */
 import "C"
 
-// runtime.libfuzzerHookStrCmp is the function used by Go when instrumenting string comparisons
-// in libFuzzer mode. However, this function is internal in the runtime package and cannot
-// be accessed directly. This is why we resort to the go:linkname trick in order to make it
-// available to the hooks under the GuideTowardsEquality alias.
+// Starting from Go 1.19 the runtime package has a function runtime.libfuzzerHookStrCmp
+// that calls __sanitizer_weak_hook_strcmp. We can make this internal function available
+// here using the go:linkname trick. We opted to use cgo to call this function to make sure
+// that the sanitizers module also work for code bases using older Go versions.
 
-//go:linkname GuideTowardsEquality runtime.libfuzzerHookStrCmp
-func GuideTowardsEquality(s1, s2 string, fakePC int)
+/*
+GuideTowardsEquality instructs the libFuzzer to guide its mutations towards making current
+equal to target. fakePC serves as an ID to identify the call sites of this function.
+
+If the relation between the raw fuzzer input and the value of current is relatively
+complex, running the fuzzer with the argument `-use_value_profile=1` may be necessary to
+achieve equality.
+*/
+func GuideTowardsEquality(s1, s2 string, fakePC int) {
+	s1CStr := C.CString(s1)
+	s2CStr := C.CString(s2)
+	C.__sanitizer_weak_hook_strcmp(C.uintptr_t(fakePC), s1CStr, s2CStr, C.int(1))
+	C.free(unsafe.Pointer(s1CStr))
+	C.free(unsafe.Pointer(s2CStr))
+}
 
 /*
 GuideTowardsContainment instructs the libFuzzer to guide its mutations towards making
