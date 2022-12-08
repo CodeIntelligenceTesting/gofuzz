@@ -60,4 +60,10 @@ func RegisterDefaultHooks() {
 	RegisterMethodHook("Start", "*os/exec.Cmd", "CmdStart")
 
 	RegisterFunctionHook("StartProcess", "os", "OsStartProcess")
+
+	// Hooks for template injection bugs
+	RegisterMethodHook("Execute", "*html/template.Template", "HtmlTemplateExecute")
+	RegisterMethodHook("ExecuteTemplate", "*html/template.Template", "HtmlTemplateExecuteTemplate")
+	RegisterMethodHook("Execute", "*text/template.Template", "TextTemplateExecute")
+	RegisterMethodHook("ExecuteTemplate", "*text/template.Template", "TextTemplateExecuteTemplate")
 }
