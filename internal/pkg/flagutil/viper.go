@@ -3,9 +3,10 @@ package flagutil
 import (
 	"os"
 
-	"code-intelligence.com/cifuzz/pkg/log"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 )
 
 func BindFlag(flag string, flagSet *pflag.FlagSet) {

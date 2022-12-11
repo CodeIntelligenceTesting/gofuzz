@@ -3,11 +3,11 @@ package root
 import (
 	"os"
 
-	"code-intelligence.com/cifuzz/pkg/log"
 	"github.com/spf13/cobra"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/cmd/sanitize"
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/flagutil"
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 )
 
 func New() *cobra.Command {

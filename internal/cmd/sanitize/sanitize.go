@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"os"
 
-	"code-intelligence.com/cifuzz/pkg/log"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/flagutil"
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/sanitize"
 	"github.com/CodeIntelligenceTesting/gofuzz/pkg/hook"
 )
