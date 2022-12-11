@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"code-intelligence.com/cifuzz/pkg/log"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/fileutil"
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 	"github.com/CodeIntelligenceTesting/gofuzz/pkg/hook"
 )
 
