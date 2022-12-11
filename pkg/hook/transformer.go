@@ -16,6 +16,7 @@ type Transformer struct {
 	filePath           string
 	typeInfo           *types.Info
 	transformedImports map[string]string
+	numAddedHooks      int
 }
 
 func NewTransformer(file *ast.File, fileSet *token.FileSet, filePath string, typeInfo *types.Info) *Transformer {
@@ -25,10 +26,11 @@ func NewTransformer(file *ast.File, fileSet *token.FileSet, filePath string, typ
 		filePath:           filePath,
 		typeInfo:           typeInfo,
 		transformedImports: make(map[string]string),
+		numAddedHooks:      0,
 	}
 }
 
-func (t *Transformer) TransformFile() (transformed bool) {
+func (t *Transformer) TransformFile() int {
 	astutil.Apply(t.file, nil, func(cursor *astutil.Cursor) bool {
 		callExpr, ok := cursor.Node().(*ast.CallExpr)
 		if !ok {
@@ -56,7 +58,7 @@ func (t *Transformer) TransformFile() (transformed bool) {
 				astutil.AddNamedImport(t.fileSet, t.file, sanitizersPackageName, sanitizersPackagePath)
 
 				t.transformedImports[pkgPath] = pkgName
-				transformed = true
+				t.numAddedHooks += 1
 			}
 		} else if receiverType := t.typeInfo.Types[receiver]; receiverType.Addressable() {
 			if h := MatchingMethodHook(selectorExpr.Sel.Name, receiverType.Type.String()); h != nil {
@@ -66,17 +68,17 @@ func (t *Transformer) TransformFile() (transformed bool) {
 				}
 				callExpr.Args = append([]ast.Expr{NodeId(callExpr, t.filePath, t.fileSet), receiver}, callExpr.Args...)
 				astutil.AddNamedImport(t.fileSet, t.file, sanitizersPackageName, sanitizersPackagePath)
-				transformed = true
+				t.numAddedHooks += 1
 			}
 		}
 
 		return true
 	})
 
-	if transformed {
+	if t.numAddedHooks > 0 {
 		t.removeUnusedImport()
 	}
-	return
+	return t.numAddedHooks
 }
 
 func (t *Transformer) removeUnusedImport() {
