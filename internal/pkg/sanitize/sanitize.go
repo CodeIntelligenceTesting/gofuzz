@@ -41,9 +41,9 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 			continue
 		}
 		for i, sourceFile := range pkg.Syntax {
-			transformer := hook.NewTransformer(sourceFile, pkg.Fset, pkg.CompiledGoFiles[i], pkg.TypesInfo)
-			if transformer.TransformFile() {
-				originalSourceFile := pkg.CompiledGoFiles[i]
+			originalSourceFile := pkg.CompiledGoFiles[i]
+			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo)
+			if numHooks := transformer.TransformFile(); numHooks > 0 {
 				rel, err := fileutil.RelativePathInModule(pkg.Module.Dir, originalSourceFile)
 				if err != nil {
 					log.Warnf("Skipped instrumenting %q: %s", originalSourceFile, err.Error())
@@ -56,8 +56,10 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 					log.Warnf("Skipped instrumenting %q: %v", originalSourceFile, err.Error())
 					continue
 				}
-				log.Debugf("Instrumented source file: %q", originalSourceFile)
 				overlayJson.Replace[originalSourceFile] = instrumentedFilePath
+				log.Infof("Added %d hook(s) to source file %q", numHooks, originalSourceFile)
+			} else {
+				log.Debugf("No hooks were added to source file %q", originalSourceFile)
 			}
 		}
 	}

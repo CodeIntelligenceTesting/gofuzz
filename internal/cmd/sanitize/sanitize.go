@@ -48,7 +48,7 @@ func New() *cobra.Command {
 			if err != nil {
 				return errors.Errorf("Failed to write to the overlay file: %v", err)
 			}
-			log.Successf("Done. File path replacements for the instrumented files are written to %s", overlayFile)
+			log.Successf("File path replacements for the instrumented files are written to %s", overlayFile)
 			return nil
 		},
 	}
