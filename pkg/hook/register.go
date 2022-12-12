@@ -58,4 +58,6 @@ func RegisterDefaultHooks() {
 	RegisterMethodHook("Output", "*os/exec.Cmd", "CmdOutput")
 	RegisterMethodHook("Run", "*os/exec.Cmd", "CmdRun")
 	RegisterMethodHook("Start", "*os/exec.Cmd", "CmdStart")
+
+	RegisterFunctionHook("StartProcess", "os", "OsStartProcess")
 }

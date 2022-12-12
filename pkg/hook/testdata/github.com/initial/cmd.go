@@ -1,6 +1,7 @@
 package initial
 
 import (
+	"os"
 	"os/exec"
 )
 
@@ -20,4 +21,9 @@ func ExecuteArbitraryCommandOutput(data []byte, shouldCombineOutput bool) ([]byt
 	} else {
 		return cmd.Output()
 	}
+}
+
+func StartArbitraryProcess(name string) error {
+	_, err := os.StartProcess(name, []string{"arg1"}, nil)
+	return err
 }

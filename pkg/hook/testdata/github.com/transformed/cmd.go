@@ -22,3 +22,8 @@ func ExecuteArbitraryCommandOutput(data []byte, shouldCombineOutput bool) ([]byt
 		return goSanitizers.CmdOutput(0, cmd)
 	}
 }
+
+func StartArbitraryProcess(name string) error {
+	_, err := goSanitizers.OsStartProcess(0, name, []string{"arg1"}, nil)
+	return err
+}
