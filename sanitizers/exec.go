@@ -1,6 +1,7 @@
 package sanitizers
 
 import (
+	"os"
 	"os/exec"
 	"path/filepath"
 )
@@ -25,6 +26,11 @@ func CmdRun(hookId int, cmd *exec.Cmd) error {
 func CmdStart(hookId int, cmd *exec.Cmd) error {
 	checkForEvilCommandAndGuideFuzzer(hookId, cmd.Path)
 	return cmd.Start()
+}
+
+func OsStartProcess(hookId int, name string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
+	checkForEvilCommandAndGuideFuzzer(hookId, name)
+	return os.StartProcess(name, argv, attr)
 }
 
 func checkForEvilCommandAndGuideFuzzer(hookId int, path string) {
