@@ -1,41 +1,43 @@
 package sanitizers
 
 import (
+	"errors"
 	htmlTemplate "html/template"
 	"io"
-	"strings"
 	textTemplate "text/template"
-	"text/template/parse"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors"
 )
 
-const evilTemplateCommand = "{{ .EvilCommand }}"
-
 func HtmlTemplateExecute(hookId int, tmpl *htmlTemplate.Template, wr io.Writer, data any) error {
-	checkForEvilActionAndGuideFuzzer(hookId, tmpl.Tree)
+	err := detectors.NewTemplateInjection(hookId, tmpl.Tree).Detect()
+	if errors.Is(err, detectors.TemplateInjectionError) {
+		ReportFinding("Template Injection")
+	}
 	return tmpl.Execute(wr, data)
 }
 
 func HtmlTemplateExecuteTemplate(hookId int, tmpl *htmlTemplate.Template, wr io.Writer, name string, data any) error {
-	checkForEvilActionAndGuideFuzzer(hookId, tmpl.Lookup(name).Tree)
+	err := detectors.NewTemplateInjection(hookId, tmpl.Lookup(name).Tree).Detect()
+	if errors.Is(err, detectors.TemplateInjectionError) {
+		ReportFinding("Template Injection")
+	}
 	return tmpl.ExecuteTemplate(wr, name, data)
 }
 
 func TextTemplateExecute(hookId int, tmpl *textTemplate.Template, wr io.Writer, data any) error {
-	checkForEvilActionAndGuideFuzzer(hookId, tmpl.Tree)
+	err := detectors.NewTemplateInjection(hookId, tmpl.Tree).Detect()
+	if errors.Is(err, detectors.TemplateInjectionError) {
+		ReportFinding("Template Injection")
+	}
 	return tmpl.Execute(wr, data)
 }
 
 func TextTemplateExecuteTemplate(hookId int, tmpl *textTemplate.Template, wr io.Writer, name string, data any) error {
-	checkForEvilActionAndGuideFuzzer(hookId, tmpl.Lookup(name).Tree)
+	err := detectors.NewTemplateInjection(hookId, tmpl.Lookup(name).Tree).Detect()
+	if errors.Is(err, detectors.TemplateInjectionError) {
+		ReportFinding("Template Injection")
+	}
 	return tmpl.ExecuteTemplate(wr, name, data)
 
-}
-
-func checkForEvilActionAndGuideFuzzer(hookId int, tree *parse.Tree) {
-	tmplText := tree.Root.String()
-	if strings.Contains(tmplText, evilTemplateCommand) {
-		ReportFinding("Template Injection")
-	} else {
-		GuideTowardsContainment(tmplText, evilTemplateCommand, hookId)
-	}
 }
