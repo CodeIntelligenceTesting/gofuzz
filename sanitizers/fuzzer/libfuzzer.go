@@ -1,4 +1,4 @@
-package sanitizers
+package fuzzer
 
 import (
 	_ "runtime"

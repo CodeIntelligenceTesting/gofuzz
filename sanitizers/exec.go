@@ -1,43 +1,49 @@
 package sanitizers
 
 import (
+	"errors"
 	"os"
 	"os/exec"
-	"path/filepath"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors"
 )
 
-const evilCommand = "evil_command"
-
 func CmdCombinedOutput(hookId int, cmd *exec.Cmd) ([]byte, error) {
-	checkForEvilCommandAndGuideFuzzer(hookId, cmd.Path)
+	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
+	if errors.Is(err, detectors.CommandInjectionError) {
+		ReportFinding("Command Injection")
+	}
 	return cmd.CombinedOutput()
 }
 
 func CmdOutput(hookId int, cmd *exec.Cmd) ([]byte, error) {
-	checkForEvilCommandAndGuideFuzzer(hookId, cmd.Path)
+	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
+	if errors.Is(err, detectors.CommandInjectionError) {
+		ReportFinding("Command Injection")
+	}
 	return cmd.Output()
 }
 
 func CmdRun(hookId int, cmd *exec.Cmd) error {
-	checkForEvilCommandAndGuideFuzzer(hookId, cmd.Path)
+	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
+	if errors.Is(err, detectors.CommandInjectionError) {
+		ReportFinding("Command Injection")
+	}
 	return cmd.Run()
 }
 
 func CmdStart(hookId int, cmd *exec.Cmd) error {
-	checkForEvilCommandAndGuideFuzzer(hookId, cmd.Path)
+	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
+	if errors.Is(err, detectors.CommandInjectionError) {
+		ReportFinding("Command Injection")
+	}
 	return cmd.Start()
 }
 
 func OsStartProcess(hookId int, name string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
-	checkForEvilCommandAndGuideFuzzer(hookId, name)
-	return os.StartProcess(name, argv, attr)
-}
-
-func checkForEvilCommandAndGuideFuzzer(hookId int, path string) {
-	baseCommand := filepath.Base(path)
-	if baseCommand == evilCommand {
+	err := detectors.NewCommandInjection(hookId, name).Detect()
+	if errors.Is(err, detectors.CommandInjectionError) {
 		ReportFinding("Command Injection")
-	} else {
-		GuideTowardsEquality(baseCommand, evilCommand, hookId)
 	}
+	return os.StartProcess(name, argv, attr)
 }
