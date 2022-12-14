@@ -94,4 +94,10 @@ func RegisterDefaultHooks() {
 	RegisterFunctionHook("Symlink", "os", "OsSymlink")
 	RegisterFunctionHook("Truncate", "os", "OsTruncate")
 	RegisterFunctionHook("WriteFile", "os", "OsWriteFile")
+
+	RegisterFunctionHook("ReadDir", "io/ioutil", "IoutilReadDir")
+	RegisterFunctionHook("ReadFile", "io/ioutil", "IoutilReadFile")
+	RegisterFunctionHook("TempDir", "io/ioutil", "IoutilTempDir")
+	RegisterFunctionHook("TempFile", "io/ioutil", "IoutilTempFile")
+	RegisterFunctionHook("WriteFile", "io/ioutil", "IoutilWriteFile")
 }
