@@ -100,4 +100,7 @@ func RegisterDefaultHooks() {
 	RegisterFunctionHook("TempDir", "io/ioutil", "IoutilTempDir")
 	RegisterFunctionHook("TempFile", "io/ioutil", "IoutilTempFile")
 	RegisterFunctionHook("WriteFile", "io/ioutil", "IoutilWriteFile")
+
+	RegisterFunctionHook("Walk", "path/filepath", "FilepathWalk")
+	RegisterFunctionHook("WalkDir", "path/filepath", "FilepathWalkDir")
 }

@@ -47,6 +47,7 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 			Name: "github.com/initial",
 			Files: map[string]interface{}{
 				"cmd.go":      load("testdata/github.com/initial/cmd.go"),
+				"filepath.go": load("testdata/github.com/initial/filepath.go"),
 				"open.go":     load("testdata/github.com/initial/open.go"),
 				"path.go":     load("testdata/github.com/initial/path.go"),
 				"sql.go":      load("testdata/github.com/initial/sql.go"),
@@ -57,6 +58,7 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 			Name: "github.com/transformed",
 			Files: map[string]interface{}{
 				"cmd.go":      load("testdata/github.com/transformed/cmd.go"),
+				"filepath.go": load("testdata/github.com/transformed/filepath.go"),
 				"open.go":     load("testdata/github.com/transformed/open.go"),
 				"path.go":     load("testdata/github.com/transformed/path.go"),
 				"sql.go":      load("testdata/github.com/transformed/sql.go"),
