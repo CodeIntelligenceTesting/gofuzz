@@ -15,7 +15,7 @@ var TemplateInjectionError = errors.New("template injection error")
 type TemplateInjection struct {
 	id        int         // numeric identifier to distinguish between the detectors for the various call sites
 	tree      *parse.Tree // representation of the parsed template
-	faultType string      // error string return when a finding is reported
+	faultType string      // Fault type passed along to the Reporter
 }
 
 // Make sure that the template injection detector implements the Detector interface

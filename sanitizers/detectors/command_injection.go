@@ -14,7 +14,7 @@ var CommandInjectionError = errors.New("command injection error")
 type CommandInjection struct {
 	id        int    // numeric identifier to distinguish between the detectors for the various call sites
 	path      string // path of the command being executed
-	faultType string // error string return when a finding is reported
+	faultType string // Fault type passed along to the Reporter
 }
 
 // Make sure that the command injection detector implements the Detector interface
