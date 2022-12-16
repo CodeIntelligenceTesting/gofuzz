@@ -10,15 +10,14 @@ import (
 
 func reportOnDetectionCI(hookId int, cmd interface{}) {
 	var err error
-	var detectorFaultType string
 	switch v := cmd.(type) {
 	case string:
-		detectorFaultType, err = detectors.NewCommandInjection(hookId, v).Detect()
+		err = detectors.NewCommandInjection(hookId, v).Detect()
 	case *exec.Cmd:
-		detectorFaultType, err = detectors.NewCommandInjection(hookId, v.Path).Detect()
+		err = detectors.NewCommandInjection(hookId, v.Path).Detect()
 	}
 	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding(detectorFaultType)
+		ReportFinding(err.Error())
 	}
 }
 

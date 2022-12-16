@@ -9,31 +9,29 @@ import (
 
 const evilCommand = "evil_command"
 
-var CommandInjectionError = errors.New("command injection error")
+var CommandInjectionError = errors.New("Command injection")
 
 type CommandInjection struct {
-	id        int    // numeric identifier to distinguish between the detectors for the various call sites
-	path      string // path of the command being executed
-	faultType string // Fault type passed along to the Reporter
+	id   int    // numeric identifier to distinguish between the detectors for the various call sites
+	path string // path of the command being executed
 }
 
 // Make sure that the command injection detector implements the Detector interface
 var _ Detector = (*CommandInjection)(nil)
 
-func (ci *CommandInjection) Detect() (string, error) {
+func (ci *CommandInjection) Detect() error {
 	baseCommand := filepath.Base(ci.path)
 	if baseCommand == evilCommand {
-		return ci.faultType, CommandInjectionError
+		return CommandInjectionError
 	}
 
 	fuzzer.GuideTowardsEquality(baseCommand, evilCommand, ci.id)
-	return "", nil
+	return nil
 }
 
 func NewCommandInjection(id int, path string) *CommandInjection {
 	return &CommandInjection{
-		id:        id,
-		path:      path,
-		faultType: "Command Injection",
+		id:   id,
+		path: path,
 	}
 }

@@ -10,19 +10,18 @@ import (
 
 func reportOnDetectionTI(hookId int, tmpl interface{}, args ...any) {
 	var err error
-	var detectorFaultType string
 	switch v := tmpl.(type) {
 	case *htmlTemplate.Template, *textTemplate.Template:
 		if len(args) == 0 {
 			// Direct call to `.Tree`
-			detectorFaultType, err = detectors.NewTemplateInjection(hookId, v.Tree).Detect()
+			err = detectors.NewTemplateInjection(hookId, v.Tree).Detect()
 		} else {
 			// Call `.Lookup()` first to resolve `name` before calling `.Tree`
-			detectorFaultType, err = detectors.NewTemplateInjection(hookId, v.Lookup(args[0]).Tree).Detect()
+			err = detectors.NewTemplateInjection(hookId, v.Lookup(args[0]).Tree).Detect()
 		}
 	}
 	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding(detectorFaultType)
+		ReportFinding(err.Error())
 	}
 }
 
