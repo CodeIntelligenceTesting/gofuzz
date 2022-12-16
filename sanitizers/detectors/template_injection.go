@@ -10,7 +10,7 @@ import (
 
 const evilTemplateAction = "{{ .EvilAction }}"
 
-var TemplateInjectionError = errors.New("Template injection")
+var TemplateInjectionError = errors.New("Template injection error")
 
 type TemplateInjection struct {
 	id   int         // numeric identifier to distinguish between the detectors for the various call sites

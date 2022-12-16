@@ -9,7 +9,7 @@ import (
 
 const evilCommand = "evil_command"
 
-var CommandInjectionError = errors.New("Command injection")
+var CommandInjectionError = errors.New("Command injection error")
 
 type CommandInjection struct {
 	id   int    // numeric identifier to distinguish between the detectors for the various call sites
