@@ -2,9 +2,11 @@ package detectors
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 // SQLCharactersToEscape represents the characters that should be escaped in user input.
@@ -19,29 +21,41 @@ var syntaxErrors = []*regexp.Regexp{
 }
 
 type SQLInjection struct {
-	id    int    // numeric identifier to distinguish between the detectors for the various call sites
-	query string // the SQL query that has been executed
-	err   error  // the error resulting from executing the SQL query
+	DetectorClass
 }
 
-// Make sure that the SQL injection detector implements the Detector interface
-var _ Detector = (*SQLInjection)(nil)
-
-func (si *SQLInjection) Detect() error {
+func (si *SQLInjection) Detect() *SQLInjection {
 	if isSyntaxError(si.err) {
-		return SQLInjectionError
+		si.detect = true
 	}
-	if si.query != "" {
-		fuzzer.GuideTowardsContainment(si.query, SQLCharactersToEscape, si.id)
+	if si.cmd != "" {
+		fuzzer.GuideTowardsContainment(si.cmd, SQLCharactersToEscape, si.id)
 	}
-	return nil
+	return si
+}
+
+func (si *SQLInjection) Report(args ...any) {
+	if !si.detect {
+		return
+	}
+	if errors.Is(si.err, SQLInjectionError) {
+		if len(si.cmd) > 0 {
+			reporter.ReportFindingf("%s: query %s, args [%s]", si.err.Error(), si.cmd, fmt.Sprint(args...))
+		} else {
+			reporter.ReportFindingf("%s: args [%s]", si.err.Error(), fmt.Sprint(args...))
+		}
+	}
 }
 
 func NewSQLInjection(id int, query string, err error) *SQLInjection {
 	return &SQLInjection{
-		id:    id,
-		query: query,
-		err:   err,
+		DetectorClass: DetectorClass{
+			id:     id,
+			detect: false,
+			cmd:    query,
+			tree:   nil,
+			err:    err,
+		},
 	}
 }
 

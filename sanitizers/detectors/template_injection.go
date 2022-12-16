@@ -2,10 +2,13 @@ package detectors
 
 import (
 	"errors"
+	htmlTemplate "html/template"
 	"strings"
+	textTemplate "text/template"
 	"text/template/parse"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 const evilTemplateAction = "{{ .EvilAction }}"
@@ -13,26 +16,40 @@ const evilTemplateAction = "{{ .EvilAction }}"
 var TemplateInjectionError = errors.New("Template injection error")
 
 type TemplateInjection struct {
-	id   int         // numeric identifier to distinguish between the detectors for the various call sites
-	tree *parse.Tree // representation of the parsed template
+	DetectorClass
 }
 
-// Make sure that the template injection detector implements the Detector interface
-var _ Detector = (*TemplateInjection)(nil)
-
-func (ti *TemplateInjection) Detect() error {
+func (ti *TemplateInjection) Detect() *TemplateInjection {
 	tmplText := ti.tree.Root.String()
 	if strings.Contains(tmplText, evilTemplateAction) {
-		return TemplateInjectionError
+		ti.detect = true
 	} else {
 		fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, ti.id)
 	}
-	return nil
+	return ti
 }
 
-func NewTemplateInjection(id int, tree *parse.Tree) *TemplateInjection {
+func (ti *TemplateInjection) Report() {
+	reporter.ReportFinding(TemplateInjectionError.Error())
+}
+
+func NewTemplateInjection(id int, ttype interface{}, args ...any) *TemplateInjection {
+	var tree *parse.Tree
+	switch v := ttype.(type) {
+	case *htmlTemplate.Template, *textTemplate.Template:
+		if len(args) == 0 {
+			tree = v.Tree
+		} else {
+			tree = v.Lookup(args[0]).Tree
+		}
+	}
 	return &TemplateInjection{
-		id:   id,
-		tree: tree,
+		DetectorClass: DetectorClass{
+			id:     id,
+			detect: false,
+			cmd:    "",
+			tree:   tree,
+			err:    nil,
+		},
 	}
 }
