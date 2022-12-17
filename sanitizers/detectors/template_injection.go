@@ -15,14 +15,13 @@ const evilTemplateAction = "{{ .EvilAction }}"
 
 var TemplateInjectionError = errors.New("Template injection error")
 
-func (dc *DetectorClass) DetectTemplateInjection() *DetectorClass {
+func (dc *DetectorClass) DetectTemplateInjection() {
 	tmplText := dc.tree.Root.String()
 	if strings.Contains(tmplText, evilTemplateAction) {
-		dc.detect = true
-	} else {
-		fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, dc.id)
+		dc.ReportTemplateInjection()
+		return
 	}
-	return dc
+	fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, dc.id)
 }
 
 func (dc *DetectorClass) ReportTemplateInjection() {

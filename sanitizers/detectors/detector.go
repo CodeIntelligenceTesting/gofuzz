@@ -19,12 +19,12 @@ func (d Detectors) String() string {
 }
 
 type DetectorClass struct {
-	d      Detectors   // Concrete Detector for this instance
-	id     int         // numeric identifier to distinguish between the detectors for the various call sites
-	detect bool        // Is toggled on when a bug was detected
-	cmd    string      // the tampered with SQL query/cmd/path/...
-	tree   *parse.Tree // Template injection specific field
-	err    error       // Generic error handler
+	d         Detectors   // Concrete Detector for this instance
+	id        int         // Numeric identifier to distinguish between the detectors for the various call sites
+	cmd       string      // The tampered with SQL query/cmd/path/...
+	tree      *parse.Tree // Template injection specific field
+	err       error       // Generic error handler
+	extraArgs []any       // Any amount of extra parameters that are necessary for detection logic/report verbosity
 }
 
 func GetCommand(CmdType interface{}) string {
@@ -42,12 +42,12 @@ func GetCommand(CmdType interface{}) string {
 
 func (d Detectors) New(id int, cmdType interface{}, treeType interface{}, err error, args ...any) *DetectorClass {
 	var dc = DetectorClass{
-		d:      d,
-		id:     id,
-		detect: false,
-		cmd:    GetCommand(cmdType),
-		tree:   GetTree(treeType, args),
-		err:    err,
+		d:         d,
+		id:        id,
+		cmd:       GetCommand(cmdType),
+		tree:      GetTree(treeType, args),
+		err:       err,
+		extraArgs: args,
 	}
 	return &dc
 }
@@ -65,7 +65,7 @@ func (dc *DetectorClass) Detect() *DetectorClass {
 	return dc
 }
 
-func (dc *DetectorClass) Report(args ...any) {
+func (dc *DetectorClass) Report() {
 	switch dc.d {
 	case SQLInjection:
 		dc.ReportSQLI()

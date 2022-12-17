@@ -20,26 +20,23 @@ var syntaxErrors = []*regexp.Regexp{
 	regexp.MustCompile(`\S+ ERROR: syntax error at or near .* \(SQLSTATE 42601\)`),         // PostgreSQL error message
 }
 
-func (dc *DetectorClass) DetectSQLI() *DetectorClass {
+func (dc *DetectorClass) DetectSQLI() {
 	if isSyntaxError(dc.err) {
-		dc.detect = true
+		dc.ReportSQLI()
+		return
 	}
 	if dc.cmd != "" {
 		fuzzer.GuideTowardsContainment(dc.cmd, SQLCharactersToEscape, dc.id)
 	}
-	return dc
 
 }
 
-func (dc *DetectorClass) ReportSQLI(args ...any) {
-	if !dc.detect {
-		return
-	}
+func (dc *DetectorClass) ReportSQLI() {
 	if errors.Is(dc.err, SQLInjectionError) {
 		if len(dc.cmd) > 0 {
-			reporter.ReportFindingf("%s: query %s, args [%s]", dc.err.Error(), dc.cmd, fmt.Sprint(args...))
+			reporter.ReportFindingf("%s: query %s, args [%s]", dc.err.Error(), dc.cmd, fmt.Sprint(dc.extraArgs...))
 		} else {
-			reporter.ReportFindingf("%s: args [%s]", dc.err.Error(), fmt.Sprint(args...))
+			reporter.ReportFindingf("%s: args [%s]", dc.err.Error(), fmt.Sprint(dc.extraArgs...))
 		}
 	}
 }

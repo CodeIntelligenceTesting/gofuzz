@@ -12,17 +12,16 @@ const evilCommand = "evil_command"
 
 var CommandInjectionError = errors.New("Command injection error")
 
-func (dc *DetectorClass) DetectCommandInjection() *DetectorClass {
+func (dc *DetectorClass) DetectCommandInjection() {
 	baseCommand := filepath.Base(dc.cmd)
 	if baseCommand == evilCommand {
-		dc.detect = true
+		dc.ReportCommandInjection()
+		return
 	}
 	fuzzer.GuideTowardsEquality(baseCommand, evilCommand, dc.id)
-	return dc
+
 }
 
 func (dc *DetectorClass) ReportCommandInjection() {
-	if dc.detect {
-		reporter.ReportFinding(CommandInjectionError.Error())
-	}
+	reporter.ReportFinding(CommandInjectionError.Error())
 }

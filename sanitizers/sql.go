@@ -12,7 +12,7 @@ var si detectors.Detectors = detectors.SQLInjection
 
 func ConnExecContext(hookId int, conn *sql.Conn, ctx context.Context, query string, args ...any) (sql.Result, error) {
 	result, sqlErr := conn.ExecContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report(args)
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
@@ -23,49 +23,49 @@ func ConnPrepareContext(hookId int, conn *sql.Conn, ctx context.Context, query s
 
 func ConnQueryContext(hookId int, conn *sql.Conn, ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := conn.QueryContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report(args)
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func ConnQueryRowContext(hookId int, conn *sql.Conn, ctx context.Context, query string, args ...any) *sql.Row {
 	row := conn.QueryRowContext(ctx, query, args...)
-	si.New(hookId, query, nil row.Err()).Detect().Report(args)
+	si.New(hookId, query, nil, row.Err(), args).Detect()
 	return row
 }
 
 func DbExec(hookId int, db *sql.DB, query string, args ...any) (sql.Result, error) {
 	result, sqlErr := db.Exec(query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func DbExecContext(hookId int, db *sql.DB, ctx context.Context, query string, args ...any) (sql.Result, error) {
 	result, sqlErr := db.ExecContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func DbQuery(hookId int, db *sql.DB, query string, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := db.Query(query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func DbQueryContext(hookId int, db *sql.DB, ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := db.QueryContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func DbQueryRow(hookId int, db *sql.DB, query string, args ...any) *sql.Row {
 	row := db.QueryRow(query, args...)
-	si.New(hookId, query, nil, row.Err()).Detect().Report(args)
+	si.New(hookId, query, nil, row.Err(), args).Detect()
 	return row
 }
 
 func DbQueryRowContext(hookId int, db *sql.DB, ctx context.Context, query string, args ...any) *sql.Row {
 	row := db.QueryRowContext(ctx, query, args...)
-	si.New(hookId, query, nil, row.Err()).Detect().Report(args)
+	si.New(hookId, query, nil, row.Err(), args).Detect()
 	return row
 }
 
@@ -81,37 +81,37 @@ func DbPrepareContext(hookId int, db *sql.DB, ctx context.Context, query string)
 
 func TxExec(hookId int, tx *sql.Tx, query string, args ...any) (sql.Result, error) {
 	result, sqlErr := tx.Exec(query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func TxExecContext(hookId int, tx *sql.Tx, ctx context.Context, query string, args ...any) (sql.Result, error) {
 	result, sqlErr := tx.ExecContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func TxQuery(hookId int, tx *sql.Tx, query string, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := tx.Query(query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func TxQueryContext(hookId int, tx *sql.Tx, ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := tx.QueryContext(ctx, query, args...)
-	si.New(hookId, query, nil, sqlErr).Detect().Report()
+	si.New(hookId, query, nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func TxQueryRow(hookId int, tx *sql.Tx, query string, args ...any) *sql.Row {
 	row := tx.QueryRow(query, args...)
-	si.New(hookId, query, nil, row.Err()).Detect().Report(args)
+	si.New(hookId, query, nil, row.Err(), args).Detect()
 	return row
 }
 
 func TxQueryRowContext(hookId int, tx *sql.Tx, ctx context.Context, query string, args ...any) *sql.Row {
 	row := tx.QueryRowContext(ctx, query, args...)
-	si.New(hookId, query, nil, row.Err()).Detect().Report(args)
+	si.New(hookId, query, nil, row.Err(), args).Detect()
 	return row
 }
 
@@ -127,36 +127,36 @@ func TxPrepareContext(hookId int, tx *sql.Tx, ctx context.Context, query string)
 
 func StmtExec(_ int, stmt *sql.Stmt, args ...any) (sql.Result, error) {
 	result, sqlErr := stmt.Exec(args...)
-	si.New(0, "", nil, sqlErr).Detect().Report(args)
+	si.New(0, "", nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func StmtExecContext(_ int, stmt *sql.Stmt, ctx context.Context, args ...any) (sql.Result, error) {
 	result, sqlErr := stmt.ExecContext(ctx, args...)
-	si.New(0, "", nil, sqlErr).Detect().Report(args)
+	si.New(0, "", nil, sqlErr, args).Detect()
 	return result, sqlErr
 }
 
 func StmtQuery(_ int, stmt *sql.Stmt, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := stmt.Query(args...)
-	si.New(0, "", nil, sqlErr).Detect().Report(args)
+	si.New(0, "", nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func StmtQueryContext(_ int, stmt *sql.Stmt, ctx context.Context, args ...any) (*sql.Rows, error) {
 	rows, sqlErr := stmt.QueryContext(ctx, args...)
-	si.New(0, "", nil, sqlErr).Detect().Report(args)
+	si.New(0, "", nil, sqlErr, args).Detect()
 	return rows, sqlErr
 }
 
 func StmtQueryRow(_ int, stmt *sql.Stmt, args ...any) *sql.Row {
 	row := stmt.QueryRow(args...)
-	si.New(0, "", nil, row.Err()).Detect().Report(args)
+	si.New(0, "", nil, row.Err(), args).Detect()
 	return row
 }
 
 func StmtQueryRowContext(_ int, stmt *sql.Stmt, ctx context.Context, args ...any) *sql.Row {
 	row := stmt.QueryRowContext(ctx, args...)
-	si.New(0, "", nil, row.Err()).Detect().Report(args)
+	si.New(0, "", nil, row.Err(), args).Detect()
 	return row
 }
