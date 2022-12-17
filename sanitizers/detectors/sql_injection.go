@@ -20,42 +20,27 @@ var syntaxErrors = []*regexp.Regexp{
 	regexp.MustCompile(`\S+ ERROR: syntax error at or near .* \(SQLSTATE 42601\)`),         // PostgreSQL error message
 }
 
-type SQLInjection struct {
-	DetectorClass
+func (dc *DetectorClass) DetectSQLI() *DetectorClass {
+	if isSyntaxError(dc.err) {
+		dc.detect = true
+	}
+	if dc.cmd != "" {
+		fuzzer.GuideTowardsContainment(dc.cmd, SQLCharactersToEscape, dc.id)
+	}
+	return dc
+
 }
 
-func (si *SQLInjection) Detect() *SQLInjection {
-	if isSyntaxError(si.err) {
-		si.detect = true
-	}
-	if si.cmd != "" {
-		fuzzer.GuideTowardsContainment(si.cmd, SQLCharactersToEscape, si.id)
-	}
-	return si
-}
-
-func (si *SQLInjection) Report(args ...any) {
-	if !si.detect {
+func (dc *DetectorClass) ReportSQLI(args ...any) {
+	if !dc.detect {
 		return
 	}
-	if errors.Is(si.err, SQLInjectionError) {
-		if len(si.cmd) > 0 {
-			reporter.ReportFindingf("%s: query %s, args [%s]", si.err.Error(), si.cmd, fmt.Sprint(args...))
+	if errors.Is(dc.err, SQLInjectionError) {
+		if len(dc.cmd) > 0 {
+			reporter.ReportFindingf("%s: query %s, args [%s]", dc.err.Error(), dc.cmd, fmt.Sprint(args...))
 		} else {
-			reporter.ReportFindingf("%s: args [%s]", si.err.Error(), fmt.Sprint(args...))
+			reporter.ReportFindingf("%s: args [%s]", dc.err.Error(), fmt.Sprint(args...))
 		}
-	}
-}
-
-func NewSQLInjection(id int, query string, err error) *SQLInjection {
-	return &SQLInjection{
-		DetectorClass: DetectorClass{
-			id:     id,
-			detect: false,
-			cmd:    query,
-			tree:   nil,
-			err:    err,
-		},
 	}
 }
 

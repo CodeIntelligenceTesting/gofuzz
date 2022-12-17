@@ -8,23 +8,25 @@ import (
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors"
 )
 
+var ti detectors.Detectors = detectors.TemplateInjection
+
 func HtmlTemplateExecute(hookId int, tmpl *htmlTemplate.Template, wr io.Writer, data any) error {
-	detectors.NewTemplateInjection(hookId, tmpl).Detect().Report()
+	ti.New(hookId, nil, tmpl, nil).Detect().Report()
 	return tmpl.Execute(wr, data)
 }
 
 func HtmlTemplateExecuteTemplate(hookId int, tmpl *htmlTemplate.Template, wr io.Writer, name string, data any) error {
-	detectors.NewTemplateInjection(hookId, tmpl, name).Detect().Report()
+	ti.New(hookId, nil, tmpl, nil, name).Detect().Report()
 	return tmpl.ExecuteTemplate(wr, name, data)
 }
 
 func TextTemplateExecute(hookId int, tmpl *textTemplate.Template, wr io.Writer, data any) error {
-	detectors.NewTemplateInjection(hookId, tmpl).Detect().Report()
+	ti.New(hookId, nil, tmpl, nil).Detect().Report()
 	return tmpl.Execute(wr, data)
 }
 
 func TextTemplateExecuteTemplate(hookId int, tmpl *textTemplate.Template, wr io.Writer, name string, data any) error {
-	detectors.NewTemplateInjection(hookId, tmpl, name).Detect().Report()
+	ti.New(hookId, nil, tmpl, nil, name).Detect().Report()
 	return tmpl.ExecuteTemplate(wr, name, data)
 
 }

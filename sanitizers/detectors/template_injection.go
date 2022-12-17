@@ -15,25 +15,21 @@ const evilTemplateAction = "{{ .EvilAction }}"
 
 var TemplateInjectionError = errors.New("Template injection error")
 
-type TemplateInjection struct {
-	DetectorClass
-}
-
-func (ti *TemplateInjection) Detect() *TemplateInjection {
-	tmplText := ti.tree.Root.String()
+func (dc *DetectorClass) DetectPathTraversal() *DetectorClass {
+	tmplText := dc.tree.Root.String()
 	if strings.Contains(tmplText, evilTemplateAction) {
-		ti.detect = true
+		dc.detect = true
 	} else {
-		fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, ti.id)
+		fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, dc.id)
 	}
-	return ti
+	return dc
 }
 
-func (ti *TemplateInjection) Report() {
+func (dc *DetectorClass) ReportPathTraversal() {
 	reporter.ReportFinding(TemplateInjectionError.Error())
 }
 
-func NewTemplateInjection(id int, ttype interface{}, args ...any) *TemplateInjection {
+func GetTree(ttype interface{}, args ...any) *parse.Tree {
 	var tree *parse.Tree
 	switch v := ttype.(type) {
 	case *htmlTemplate.Template, *textTemplate.Template:
@@ -42,14 +38,8 @@ func NewTemplateInjection(id int, ttype interface{}, args ...any) *TemplateInjec
 		} else {
 			tree = v.Lookup(args[0]).Tree
 		}
+	default:
+		tree = nil
 	}
-	return &TemplateInjection{
-		DetectorClass: DetectorClass{
-			id:     id,
-			detect: false,
-			cmd:    "",
-			tree:   tree,
-			err:    nil,
-		},
-	}
+	return tree
 }

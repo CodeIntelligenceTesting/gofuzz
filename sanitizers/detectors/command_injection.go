@@ -2,7 +2,6 @@ package detectors
 
 import (
 	"errors"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
@@ -13,40 +12,17 @@ const evilCommand = "evil_command"
 
 var CommandInjectionError = errors.New("Command injection error")
 
-type CommandInjection struct {
-	DetectorClass
-}
-
-func (ci *CommandInjection) Detect() *CommandInjection {
-	baseCommand := filepath.Base(ci.cmd)
+func (dc *DetectorClass) DetectCommandInjection() *DetectorClass {
+	baseCommand := filepath.Base(dc.cmd)
 	if baseCommand == evilCommand {
-		ci.detect = true
+		dc.detect = true
 	}
-	fuzzer.GuideTowardsEquality(baseCommand, evilCommand, ci.id)
-	return ci
+	fuzzer.GuideTowardsEquality(baseCommand, evilCommand, dc.id)
+	return dc
 }
 
-func (ci *CommandInjection) Report() {
-	if ci.detect {
+func (dc *DetectorClass) ReportCommandInjection() {
+	if dc.detect {
 		reporter.ReportFinding(CommandInjectionError.Error())
-	}
-}
-
-func NewCommandInjection(id int, ctype interface{}) *CommandInjection {
-	var c string
-	switch v := ctype.(type) {
-	case string:
-		c = v
-	case *exec.Cmd:
-		c = v.Path
-	}
-	return &CommandInjection{
-		DetectorClass: DetectorClass{
-			id:     id,
-			detect: false,
-			cmd:    c,
-			tree:   nil,
-			err:    nil,
-		},
 	}
 }
