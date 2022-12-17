@@ -15,7 +15,7 @@ const evilTemplateAction = "{{ .EvilAction }}"
 
 var TemplateInjectionError = errors.New("Template injection error")
 
-func (dc *DetectorClass) DetectPathTraversal() *DetectorClass {
+func (dc *DetectorClass) DetectTemplateInjection() *DetectorClass {
 	tmplText := dc.tree.Root.String()
 	if strings.Contains(tmplText, evilTemplateAction) {
 		dc.detect = true
@@ -25,7 +25,7 @@ func (dc *DetectorClass) DetectPathTraversal() *DetectorClass {
 	return dc
 }
 
-func (dc *DetectorClass) ReportPathTraversal() {
+func (dc *DetectorClass) ReportTemplateInjection() {
 	reporter.ReportFinding(TemplateInjectionError.Error())
 }
 

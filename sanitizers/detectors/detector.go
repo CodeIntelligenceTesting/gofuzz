@@ -57,7 +57,7 @@ func (dc *DetectorClass) Detect() *DetectorClass {
 	case SQLInjection:
 		dc.DetectSQLI()
 	case TemplateInjection:
-		dc.DetectPathTraversal()
+		dc.ReportTemplateInjection()
 	case CommandInjection:
 		dc.DetectCommandInjection()
 	}
@@ -70,7 +70,7 @@ func (dc *DetectorClass) Report(args ...any) {
 	case SQLInjection:
 		dc.ReportSQLI()
 	case TemplateInjection:
-		dc.ReportPathTraversal()
+		dc.ReportTemplateInjection()
 	case CommandInjection:
 		dc.ReportCommandInjection()
 	}
