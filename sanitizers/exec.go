@@ -7,7 +7,7 @@ import (
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors"
 )
 
-var ci = detectors.CommandInjection
+var ci detectors.Detectors = detectors.CommandInjection
 
 func CmdCombinedOutput(hookId int, cmd *exec.Cmd) ([]byte, error) {
 	ci.New(hookId, cmd, nil, nil).Detect().Report()
