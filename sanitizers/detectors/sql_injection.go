@@ -2,11 +2,9 @@ package detectors
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
-	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 // SQLCharactersToEscape represents the characters that should be escaped in user input.
@@ -22,23 +20,13 @@ var syntaxErrors = []*regexp.Regexp{
 
 func (dc *DetectorClass) DetectSQLI() {
 	if isSyntaxError(dc.err) {
-		dc.ReportSQLI()
+		dc.Report()
 		return
 	}
 	if dc.cmd != "" {
 		fuzzer.GuideTowardsContainment(dc.cmd, SQLCharactersToEscape, dc.id)
 	}
 
-}
-
-func (dc *DetectorClass) ReportSQLI() {
-	if errors.Is(dc.err, SQLInjectionError) {
-		if len(dc.cmd) > 0 {
-			reporter.ReportFindingf("%s: query %s, args [%s]", dc.err.Error(), dc.cmd, fmt.Sprint(dc.extraArgs...))
-		} else {
-			reporter.ReportFindingf("%s: args [%s]", dc.err.Error(), fmt.Sprint(dc.extraArgs...))
-		}
-	}
 }
 
 func isSyntaxError(err error) bool {

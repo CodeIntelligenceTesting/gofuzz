@@ -1,8 +1,12 @@
 package detectors
 
 import (
+	"errors"
+	"fmt"
 	"os/exec"
 	"text/template/parse"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 type Detectors int64
@@ -57,21 +61,25 @@ func (dc *DetectorClass) Detect() *DetectorClass {
 	case SQLInjection:
 		dc.DetectSQLI()
 	case TemplateInjection:
-		dc.ReportTemplateInjection()
+		dc.DetectTemplateInjection()
 	case CommandInjection:
 		dc.DetectCommandInjection()
 	}
-
 	return dc
 }
 
 func (dc *DetectorClass) Report() {
+	var reportErr = fmt.Sprint("%s error", dc.d)
 	switch dc.d {
 	case SQLInjection:
-		dc.ReportSQLI()
-	case TemplateInjection:
-		dc.ReportTemplateInjection()
-	case CommandInjection:
-		dc.ReportCommandInjection()
+		if errors.Is(dc.err, SQLInjectionError) {
+			if len(dc.cmd) > 0 {
+				reporter.ReportFindingf(": query %s, args [%s]", dc.cmd, fmt.Sprint(dc.extraArgs...))
+			} else {
+				reporter.ReportFindingf(": args [%s]", fmt.Sprint(dc.extraArgs...))
+			}
+		}
+	case TemplateInjection, CommandInjection:
+		reporter.ReportFinding(reportErr)
 	}
 }

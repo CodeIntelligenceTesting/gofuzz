@@ -8,7 +8,6 @@ import (
 	"text/template/parse"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
-	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 const evilTemplateAction = "{{ .EvilAction }}"
@@ -18,14 +17,10 @@ var TemplateInjectionError = errors.New("Template injection error")
 func (dc *DetectorClass) DetectTemplateInjection() {
 	tmplText := dc.tree.Root.String()
 	if strings.Contains(tmplText, evilTemplateAction) {
-		dc.ReportTemplateInjection()
+		dc.Report()
 		return
 	}
 	fuzzer.GuideTowardsContainment(tmplText, evilTemplateAction, dc.id)
-}
-
-func (dc *DetectorClass) ReportTemplateInjection() {
-	reporter.ReportFinding(TemplateInjectionError.Error())
 }
 
 func GetTree(ttype interface{}, args ...any) *parse.Tree {
