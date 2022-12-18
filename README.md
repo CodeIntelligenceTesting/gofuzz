@@ -2,7 +2,7 @@
   <h1>gofuzz</h1>
   <p>Bug detectors for Golang</p>
   <a href="https://github.com/CodeIntelligenceTesting/gofuzz/actions/workflows/run-all-tests.yml">
-    <img src="https://img.shields.io/github/workflow/status/CodeIntelligenceTesting/gofuzz/Tests%20and%20Linting?logo=github" />
+    <img src="https://img.shields.io/github/actions/workflow/status/CodeIntelligenceTesting/gofuzz/run-all-tests.yml?branch=main&logo=github" />
   </a>
   <a href="https://github.com/CodeIntelligenceTesting/gofuzz/blob/main/CONTRIBUTING.md">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" />
