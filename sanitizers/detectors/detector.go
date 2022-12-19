@@ -64,6 +64,8 @@ func (dc *DetectorClass) Detect() *DetectorClass {
 		dc.DetectTemplateInjection()
 	case CommandInjection:
 		dc.DetectCommandInjection()
+	case PathTraversal:
+		dc.DetectPathTraversal()
 	}
 	return dc
 }
@@ -81,5 +83,9 @@ func (dc *DetectorClass) Report() {
 		}
 	case TemplateInjection, CommandInjection:
 		reporter.ReportFinding(reportErr)
+	case PathTraversal:
+		if errors.Is(dc.err, PathTraversalError) {
+			reporter.ReportFindingf("%s: vulnerable path %q", reportErr, dc.cmd)
+		}
 	}
 }
