@@ -18,7 +18,7 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 	pkgs, err := packages.Load(&packages.Config{
 		Mode:       NeededLoadMode(),
 		Env:        os.Environ(),
-		BuildFlags: opts.BuildTags,
+		BuildFlags: opts.BuildFlags,
 	}, "pattern="+pkgPattern)
 
 	if err != nil {
