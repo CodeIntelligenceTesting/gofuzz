@@ -36,10 +36,11 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 	}
 	log.Debugf("Working directory: %q\n", workDir)
 
-	for _, pkg := range pkgs {
+	packages.Visit(pkgs, nil, func(pkg *packages.Package) {
 		if !opts.shouldSanitize(pkg.PkgPath) {
-			continue
+			return
 		}
+		log.Debugf("Instrumenting package %q", pkg.PkgPath)
 		for i, sourceFile := range pkg.Syntax {
 			originalSourceFile := pkg.CompiledGoFiles[i]
 			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo, hook.NodeId)
@@ -68,7 +69,7 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 				log.Debugf("No hooks were added to source file %q", originalSourceFile)
 			}
 		}
-	}
+	})
 
 	return overlayJson, nil
 }
