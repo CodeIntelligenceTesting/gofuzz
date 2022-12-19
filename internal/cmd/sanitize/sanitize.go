@@ -2,7 +2,9 @@ package sanitize
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -25,9 +27,9 @@ func New() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overlayJSON, err := sanitize.Sanitize(args[0], &sanitize.Options{
-				Include:   viper.GetStringSlice("include"),
-				Exclude:   ignoredPatterns(),
-				BuildTags: viper.GetStringSlice("tags"),
+				Include:    viper.GetStringSlice("include"),
+				Exclude:    ignoredPatterns(),
+				BuildFlags: buildFlags(),
 			})
 			if err != nil {
 				return err
@@ -61,8 +63,8 @@ func New() *cobra.Command {
 		"A list of import paths to exclude")
 	flagutil.BindFlag("exclude", sanitizeCmd.PersistentFlags())
 
-	sanitizeCmd.PersistentFlags().StringArrayP("tags", "t", []string{},
-		"A list of build tags to consider satisfied during the build")
+	sanitizeCmd.PersistentFlags().StringP("tags", "t", "",
+		"A comma-separated list of build tags to consider satisfied during the build")
 	flagutil.BindFlag("tags", sanitizeCmd.PersistentFlags())
 
 	sanitizeCmd.PersistentFlags().StringP("overlay", "o", "overlay.json",
@@ -86,4 +88,14 @@ func ignoredPatterns() []string {
 		// Do not instrument our sanitizers package
 		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers",
 	)
+}
+
+func buildFlags() []string {
+	tags := viper.GetString("tags")
+	if tags != "" {
+		return []string{
+			fmt.Sprintf("-tags=%s", strings.Join(strings.Split(tags, ","), " ")),
+		}
+	}
+	return []string{}
 }
