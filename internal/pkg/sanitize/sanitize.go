@@ -44,19 +44,25 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 			originalSourceFile := pkg.CompiledGoFiles[i]
 			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo, hook.NodeId)
 			if numHooks := transformer.TransformFile(); numHooks > 0 {
-				rel, err := fileutil.RelativePathInModule(pkg.Module.Dir, originalSourceFile)
+				baseFile := filepath.Base(originalSourceFile)
+				baseFileNoExtension := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
+				instrumentedFile, err := os.CreateTemp(workDir, fmt.Sprintf("%s-instrumented.*.go", baseFileNoExtension))
 				if err != nil {
-					log.Warnf("Skipped instrumenting %q: %s", originalSourceFile, err.Error())
+					log.Warnf("Failed to create a temporary file to store the instrumented code for %q: %v\n"+
+						"\tThe source file will be not be instrumented with bug detection capabilities.\n"+
+						"\tAs a result, some bugs in this file might be missed when fuzzing.",
+						originalSourceFile, err)
 					continue
 				}
-
-				instrumentedFilePath := filepath.Join(workDir, rel)
-				err = fileutil.SaveASTFile(sourceFile, pkg.Fset, instrumentedFilePath)
+				err = fileutil.SaveASTFile(sourceFile, pkg.Fset, instrumentedFile.Name())
 				if err != nil {
-					log.Warnf("Skipped instrumenting %q: %v", originalSourceFile, err.Error())
+					log.Warnf("Failed to save the instrumented code for %q: %v\n"+
+						"\tThe source file will be not be instrumented with bug detection capabilities.\n"+
+						"\tAs a result, some bugs in this file might be missed when fuzzing.",
+						originalSourceFile, err.Error())
 					continue
 				}
-				overlayJson.Replace[originalSourceFile] = instrumentedFilePath
+				overlayJson.Replace[originalSourceFile] = instrumentedFile.Name()
 				log.Infof("Added %d hook(s) to source file %q", numHooks, originalSourceFile)
 			} else {
 				log.Debugf("No hooks were added to source file %q", originalSourceFile)
