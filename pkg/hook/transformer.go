@@ -8,6 +8,8 @@ import (
 	"strconv"
 
 	"golang.org/x/tools/go/ast/astutil"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 )
 
 type Transformer struct {
@@ -48,6 +50,7 @@ func (t *Transformer) TransformFile() int {
 
 		if pkgName, pkgPath, ok := importedPackage(receiver, t.file); ok {
 			if h := MatchingFunctionHook(selectorExpr.Sel.Name, pkgPath); h != nil {
+				log.Debugf("Hooked function %s.%s", pkgPath, selectorExpr.Sel.Name)
 				selectorExpr.Sel.Name = h.HookName
 				selectorExpr.X = &ast.Ident{
 					Name: sanitizersPackageName,
@@ -61,6 +64,7 @@ func (t *Transformer) TransformFile() int {
 			}
 		} else if receiverType := t.typeInfo.Types[receiver]; receiverType.IsValue() {
 			if h := MatchingMethodHook(selectorExpr.Sel.Name, receiverType.Type.String()); h != nil {
+				log.Debugf("Hooked method %s.%s", receiverType.Type.String(), selectorExpr.Sel.Name)
 				selectorExpr.Sel.Name = h.HookName
 				selectorExpr.X = &ast.Ident{
 					Name: sanitizersPackageName,
