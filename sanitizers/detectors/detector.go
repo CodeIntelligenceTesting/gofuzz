@@ -18,6 +18,11 @@ const (
 	CommandInjection
 )
 
+var SQLIDect Detectors = SQLInjection
+var TIDect Detectors = TemplateInjection
+var PTDect Detectors = PathTraversal
+var CIDect Detectors = CommandInjection
+
 func (d Detectors) String() string {
 	return []string{"SQLInjection", "TemplateInjection", "PathTraversal", "CommandInjection"}[d]
 }
@@ -54,6 +59,15 @@ func (d Detectors) New(id int, cmdType interface{}, treeType interface{}, err er
 		extraArgs: args,
 	}
 	return &dc
+}
+
+func (dc *DetectorClass) Set(id int, cmdType interface{}, treeType interface{}, err error, args ...any) *DetectorClass {
+	dc.id = id
+	dc.cmd = GetCommand(cmdType)
+	dc.tree = GetTree(treeType, args)
+	dc.err = err
+	dc.extraArgs = args
+	return dc
 }
 
 func (dc *DetectorClass) Detect() *DetectorClass {

@@ -103,4 +103,12 @@ func RegisterDefaultHooks() {
 
 	RegisterFunctionHook("Walk", "path/filepath", "FilepathWalk")
 	RegisterFunctionHook("WalkDir", "path/filepath", "FilepathWalkDir")
+
+	RegisterFunctionHook("FileInfoToDirEntry", "io/fs", "FsFileInfoToDirEntry")
+	RegisterFunctionHook("ReadDir", "io/fs", "FsReadDir")
+	RegisterFunctionHook("ReadFile", "io/fs", "FsReadFile")
+	RegisterFunctionHook("Stat", "io/fs", "FsStat")
+	RegisterFunctionHook("Sub", "io/fs", "FsSub")
+	RegisterFunctionHook("WalkDir", "io/fs", "FsWalkDir")
+	RegisterMethodHook("Open", "io/fs.FS", "FsOpen")
 }
