@@ -47,6 +47,16 @@ specialized errors representing the found bugs. The function can also guide the 
 towards producing interesting inputs that trigger the bugs of interest. You can have a 
 look at [the existing bug detectors](https://github.com/CodeIntelligenceTesting/gofuzz/tree/main/sanitizers/detectors).
 for more details.
+
+### Dependencies of the `sanitizers` package
+**ALL** transitive dependencies of the `sanitizers` package must be excluded from 
+instrumentation by **gofuzz**. Failing to do so may result in import cycles 
+and thus can cause build failures. A possible scenario of this would be when a 
+dependency `foo` calls a function/method for which the `sanitizers` package provides 
+a hook. In this case, `sanitizers` imports `foo` which in turn would import `sanitizers` 
+if instrumented. As a rule of thumb, make sure to keep the dependencies of the `sanitizers`
+package to the bare minimum.
+
 ### Guiding the fuzzer
 Bug detectors often look for certain patterns in the arguments passed to the hooked 
 functions or methods. To work effectively, they can provide hints to the fuzzer so that
