@@ -115,7 +115,7 @@ func OsReadDir(hookId int, name string) ([]os.DirEntry, error) {
 	return os.ReadDir(name)
 }
 
-func OsReadLink(hookId int, name string) (string, error) {
+func OsReadlink(hookId int, name string) (string, error) {
 	checkForPathTraversal(hookId, name)
 	return os.Readlink(name)
 }
