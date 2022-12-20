@@ -10,7 +10,7 @@
 
 ### Ubuntu / Debian
 ```bash
-sudo apt install git make golang-go libcap-dev
+sudo apt install git make golang-go 
 ```
 
 ### Arch
