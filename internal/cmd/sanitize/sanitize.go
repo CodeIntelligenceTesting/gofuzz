@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -24,6 +25,7 @@ func New() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			hook.RegisterDefaultHooks()
+			hook.SetSanitizersPackagePath(viper.GetString("sanitizers_package_path"))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overlayJSON, err := sanitize.Sanitize(args[0], &sanitize.Options{
@@ -71,6 +73,11 @@ func New() *cobra.Command {
 		"Path of the overlay file to save paths to the instrumented source files")
 	flagutil.BindFlag("overlay", sanitizeCmd.PersistentFlags())
 
+	sanitizeCmd.PersistentFlags().StringP("sanitizers_package_path", "p",
+		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers",
+		"Package path of the sanitizers package")
+	flagutil.BindFlag("sanitizers_package_path", sanitizeCmd.PersistentFlags())
+
 	return sanitizeCmd
 }
 
@@ -81,7 +88,9 @@ func ignoredPatterns() []string {
 		"runtime/race",
 
 		// Do not instrument our sanitizers package
-		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers",
+		viper.GetString("sanitizers_package_path"),
+		filepath.Join(viper.GetString("sanitizers_package_path"), "detectors"),
+		filepath.Join(viper.GetString("sanitizers_package_path"), "fuzzer"),
 
 		// transitive dependencies for the sanitizers module. To get these dependencies:
 		// go list -json github.com/CodeIntelligenceTesting/gofuzz/sanitizers
@@ -95,8 +104,6 @@ func ignoredPatterns() []string {
 		"encoding/json",
 		"errors",
 		"fmt",
-		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors",
-		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer",
 		"html",
 		"html/template",
 		"internal/abi",
