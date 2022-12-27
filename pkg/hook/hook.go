@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	sanitizersPackagePath = "github.com/CodeIntelligenceTesting/gofuzz/sanitizers"
 	sanitizersPackageName = "goSanitizers"
 )
+
+var sanitizersPackagePath = "github.com/CodeIntelligenceTesting/gofuzz/sanitizers"
 
 type FunctionHook struct {
 	FunctionName string
@@ -28,3 +29,7 @@ type Hooks struct {
 }
 
 type IdFunction = func(n ast.Node, file string, fSet *token.FileSet) *ast.BasicLit
+
+func SetSanitizersPackagePath(pkgPath string) {
+	sanitizersPackagePath = pkgPath
+}
