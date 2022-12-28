@@ -45,17 +45,21 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 			originalSourceFile := pkg.CompiledGoFiles[i]
 			transformer := hook.NewTransformer(sourceFile, pkg.Fset, originalSourceFile, pkg.TypesInfo, hook.NodeId)
 			if numHooks := transformer.TransformFile(); numHooks > 0 {
-				baseFile := filepath.Base(originalSourceFile)
-				baseFileNoExtension := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
-				instrumentedFile, err := os.CreateTemp(workDir, fmt.Sprintf("%s-instrumented.*.go", baseFileNoExtension))
-				if err != nil {
-					log.Warnf("Failed to create a temporary file to store the instrumented code for %q: %v\n"+
-						"\tThe source file will be not be instrumented with bug detection capabilities.\n"+
-						"\tAs a result, some bugs in this file might be missed when fuzzing.",
-						originalSourceFile, err)
-					continue
+				instrumentedFilePath := originalSourceFile
+				if !opts.OverwriteSources {
+					baseFile := filepath.Base(originalSourceFile)
+					baseFileNoExtension := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
+					instrumentedFile, err := os.CreateTemp(workDir, fmt.Sprintf("%s-instrumented.*.go", baseFileNoExtension))
+					if err != nil {
+						log.Warnf("Failed to create a temporary file to store the instrumented code for %q: %v\n"+
+							"\tThe source file will be not be instrumented with bug detection capabilities.\n"+
+							"\tAs a result, some bugs in this file might be missed when fuzzing.",
+							originalSourceFile, err)
+						continue
+					}
+					instrumentedFilePath = instrumentedFile.Name()
 				}
-				err = fileutil.SaveASTFile(sourceFile, pkg.Fset, instrumentedFile.Name())
+				err = fileutil.SaveASTFile(sourceFile, pkg.Fset, instrumentedFilePath)
 				if err != nil {
 					log.Warnf("Failed to save the instrumented code for %q: %v\n"+
 						"\tThe source file will be not be instrumented with bug detection capabilities.\n"+
@@ -63,7 +67,9 @@ func Sanitize(pkgPattern string, opts *Options) (*packages.OverlayJSON, error) {
 						originalSourceFile, err.Error())
 					continue
 				}
-				overlayJson.Replace[originalSourceFile] = instrumentedFile.Name()
+				if instrumentedFilePath != originalSourceFile {
+					overlayJson.Replace[originalSourceFile] = instrumentedFilePath
+				}
 				log.Infof("Added %d hook(s) to source file %q", numHooks, originalSourceFile)
 			} else {
 				log.Debugf("No hooks were added to source file %q", originalSourceFile)
