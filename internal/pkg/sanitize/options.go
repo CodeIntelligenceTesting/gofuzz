@@ -3,9 +3,10 @@ package sanitize
 import "strings"
 
 type Options struct {
-	Include    []string
-	Exclude    []string
-	BuildFlags []string
+	Include          []string
+	Exclude          []string
+	BuildFlags       []string
+	OverwriteSources bool
 }
 
 func (opts *Options) shouldSanitize(pkgPath string) bool {

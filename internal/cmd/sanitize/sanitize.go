@@ -29,9 +29,10 @@ func New() *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			overlayJSON, err := sanitize.Sanitize(args[0], &sanitize.Options{
-				Include:    viper.GetStringSlice("include"),
-				Exclude:    ignoredPatterns(),
-				BuildFlags: buildFlags(),
+				Include:          viper.GetStringSlice("include"),
+				Exclude:          ignoredPatterns(),
+				BuildFlags:       buildFlags(),
+				OverwriteSources: viper.GetBool("overwrite_sources"),
 			})
 			if err != nil {
 				return err
@@ -68,6 +69,10 @@ func New() *cobra.Command {
 	sanitizeCmd.PersistentFlags().StringP("tags", "t", "",
 		"A comma-separated list of build tags to consider satisfied during the build")
 	flagutil.BindFlag("tags", sanitizeCmd.PersistentFlags())
+
+	sanitizeCmd.PersistentFlags().Bool("overwrite_sources", false,
+		"Overwrite source files in place")
+	flagutil.BindFlag("overwrite_sources", sanitizeCmd.PersistentFlags())
 
 	sanitizeCmd.PersistentFlags().StringP("overlay", "o", "overlay.json",
 		"Path of the overlay file to save paths to the instrumented source files")
