@@ -1,7 +1,6 @@
 package sanitizers
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 
@@ -9,41 +8,26 @@ import (
 )
 
 func CmdCombinedOutput(hookId int, cmd *exec.Cmd) ([]byte, error) {
-	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
-	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding("Command Injection")
-	}
+	detectors.NewCommandInjection(hookId, cmd.Path).Detect()
 	return cmd.CombinedOutput()
 }
 
 func CmdOutput(hookId int, cmd *exec.Cmd) ([]byte, error) {
-	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
-	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding("Command Injection")
-	}
+	detectors.NewCommandInjection(hookId, cmd.Path).Detect()
 	return cmd.Output()
 }
 
 func CmdRun(hookId int, cmd *exec.Cmd) error {
-	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
-	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding("Command Injection")
-	}
+	detectors.NewCommandInjection(hookId, cmd.Path).Detect()
 	return cmd.Run()
 }
 
 func CmdStart(hookId int, cmd *exec.Cmd) error {
-	err := detectors.NewCommandInjection(hookId, cmd.Path).Detect()
-	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding("Command Injection")
-	}
+	detectors.NewCommandInjection(hookId, cmd.Path).Detect()
 	return cmd.Start()
 }
 
 func OsStartProcess(hookId int, name string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
-	err := detectors.NewCommandInjection(hookId, name).Detect()
-	if errors.Is(err, detectors.CommandInjectionError) {
-		ReportFinding("Command Injection")
-	}
+	detectors.NewCommandInjection(hookId, name).Detect()
 	return os.StartProcess(name, argv, attr)
 }

@@ -1,7 +1,6 @@
 package sanitizers
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 	"time"
@@ -25,141 +24,134 @@ for this multiplication
 */
 
 func OsChdir(hookId int, dir string) error {
-	checkForPathTraversal(hookId, dir)
+	detectors.NewPathTraversal(hookId, dir).Detect()
 	return os.Chdir(dir)
 }
 
 func OsChmod(hookId int, name string, mode os.FileMode) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Chmod(name, mode)
 }
 
 func OsChown(hookId int, name string, uid, gid int) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Chown(name, uid, gid)
 }
 
 func OsLchown(hookId int, name string, uid, gid int) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Lchown(name, uid, gid)
 }
 
 func OsCreate(hookId int, name string) (*os.File, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Create(name)
 }
 
 func OsCreateTemp(hookId int, dir, pattern string) (*os.File, error) {
-	checkForPathTraversal(hookId, dir)
+	detectors.NewPathTraversal(hookId, dir).Detect()
 	return os.CreateTemp(dir, pattern)
 }
 
-func OsDirFS(hookId int, dir string) fs.FS {
-	checkForPathTraversal(hookId, dir)
+func OsDirFs(hookId int, dir string) fs.FS {
+	detectors.NewPathTraversal(hookId, dir).Detect()
 	return os.DirFS(dir)
 }
 
 func OsChtimes(hookId int, name string, atime time.Time, mtime time.Time) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Chtimes(name, atime, mtime)
 }
 
 func OsLink(hookId int, oldname, newname string) error {
-	checkForPathTraversal(hookId, oldname)
-	checkForPathTraversal(hookId*31, newname)
+	detectors.NewPathTraversal(hookId, oldname).Detect()
+	detectors.NewPathTraversal(hookId*31, newname).Detect()
 	return os.Link(oldname, newname)
 }
 
 func OsLstat(hookId int, name string) (os.FileInfo, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Lstat(name)
 }
 
 func OsMkdirTemp(hookId int, dir, pattern string) (string, error) {
-	checkForPathTraversal(hookId, dir)
+	detectors.NewPathTraversal(hookId, dir).Detect()
 	return os.MkdirTemp(dir, pattern)
 }
 
 func OsMkdir(hookId int, name string, perm os.FileMode) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Mkdir(name, perm)
 }
 
 func OsMkdirAll(hookId int, name string, perm os.FileMode) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.MkdirAll(name, perm)
 }
 
 func OsNewFile(hookId int, fd uintptr, name string) *os.File {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.NewFile(fd, name)
 }
 
 func OsOpen(hookId int, name string) (*os.File, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Open(name)
 }
 
 func OsOpenFile(hookId int, name string, flag int, perm os.FileMode) (*os.File, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.OpenFile(name, flag, perm)
 }
 
 func OsReadFile(hookId int, name string) ([]byte, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.ReadFile(name)
 }
 
 func OsReadDir(hookId int, name string) ([]os.DirEntry, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.ReadDir(name)
 }
 
 func OsReadlink(hookId int, name string) (string, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Readlink(name)
 }
 
 func OsRename(hookId int, oldpath, newpath string) error {
-	checkForPathTraversal(hookId, oldpath)
-	checkForPathTraversal(hookId*31, newpath)
+	detectors.NewPathTraversal(hookId, oldpath).Detect()
+	detectors.NewPathTraversal(hookId*31, newpath).Detect()
 	return os.Rename(oldpath, newpath)
 }
 
 func OsRemove(hookId int, name string) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Remove(name)
 }
 
 func OsRemoveAll(hookId int, path string) error {
-	checkForPathTraversal(hookId, path)
+	detectors.NewPathTraversal(hookId, path).Detect()
 	return os.RemoveAll(path)
 }
 
 func OsStat(hookId int, name string) (os.FileInfo, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Stat(name)
 }
 
 func OsSymlink(hookId int, oldname, newname string) error {
-	checkForPathTraversal(hookId, oldname)
-	checkForPathTraversal(hookId*31, newname)
+	detectors.NewPathTraversal(hookId, oldname).Detect()
+	detectors.NewPathTraversal(hookId*31, newname).Detect()
 	return os.Symlink(oldname, newname)
 }
 
 func OsTruncate(hookId int, name string, size int64) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.Truncate(name, size)
 }
 
 func OsWriteFile(hookId int, name string, data []byte, perm os.FileMode) error {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return os.WriteFile(name, data, perm)
-}
-
-func checkForPathTraversal(hookId int, path string) {
-	err := detectors.NewPathTraversal(hookId, path).Detect()
-	if errors.Is(err, detectors.PathTraversalError) {
-		ReportFindingf("Path Traversal: vulnerable path %q", path)
-	}
 }
