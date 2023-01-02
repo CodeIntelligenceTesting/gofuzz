@@ -1,48 +1,46 @@
 package detectors
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/fuzzer"
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/reporter"
 )
 
 // SQLCharactersToEscape represents the characters that should be escaped in user input.
 // See https://dev.mysql.com/doc/refman/8.0/en/string-literals.html
 const SQLCharactersToEscape = "'\"\b\n\r\t\\%_"
 
-var SQLInjectionError = errors.New("SQL injection error")
-
 var syntaxErrors = []*regexp.Regexp{
 	regexp.MustCompile(`\S+ ERROR 1064 \(42000\): You have an error in your SQL syntax.*`), // MySQL error message
 	regexp.MustCompile(`\S+ ERROR: syntax error at or near .* \(SQLSTATE 42601\)`),         // PostgreSQL error message
 }
 
-type SQLInjection struct {
-	id    int    // numeric identifier to distinguish between the detectors for the various call sites
-	query string // the SQL query that has been executed
-	err   error  // the error resulting from executing the SQL query
-}
-
-// Make sure that the SQL injection detector implements the Detector interface
 var _ Detector = (*SQLInjection)(nil)
 
-func (si *SQLInjection) Detect() error {
-	if isSyntaxError(si.err) {
-		return SQLInjectionError
-	}
-	if si.query != "" {
-		fuzzer.GuideTowardsContainment(si.query, SQLCharactersToEscape, si.id)
-	}
-	return nil
+type SQLInjection struct {
+	id    int    // Numeric identifier to distinguish between the detectors for the various call sites
+	query string // SQL query that has been executed
+	err   error  // Error if `query` caused any unintended behavior
+	vargs []any  // Supplemental arguments that allow a more verbose error reporting
 }
 
-func NewSQLInjection(id int, query string, err error) *SQLInjection {
-	return &SQLInjection{
-		id:    id,
-		query: query,
-		err:   err,
+func (sqli *SQLInjection) Detect() {
+	if isSyntaxError(sqli.err) {
+		if len(sqli.query) > 0 {
+			reporter.ReportFindingf("SQL Injection: query %s, args [%s]", sqli.query, fmt.Sprint(sqli.vargs...))
+		} else {
+			reporter.ReportFindingf("SQL Injection: args [%s]", fmt.Sprint(sqli.vargs...))
+		}
 	}
+	if sqli.query != "" {
+		fuzzer.GuideTowardsContainment(sqli.query, SQLCharactersToEscape, sqli.id)
+	}
+}
+
+func NewSQLInjection(id int, query string, err error, vargs ...any) *SQLInjection {
+	return &SQLInjection{id, query, err, vargs}
 }
 
 func isSyntaxError(err error) bool {

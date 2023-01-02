@@ -96,6 +96,7 @@ func ignoredPatterns() []string {
 		viper.GetString("sanitizers_package_path"),
 		filepath.Join(viper.GetString("sanitizers_package_path"), "detectors"),
 		filepath.Join(viper.GetString("sanitizers_package_path"), "fuzzer"),
+		filepath.Join(viper.GetString("sanitizers_package_path"), "reporter"),
 
 		// transitive dependencies for the sanitizers module. To get these dependencies:
 		// go list -json github.com/CodeIntelligenceTesting/gofuzz/sanitizers

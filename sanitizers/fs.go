@@ -1,38 +1,42 @@
 package sanitizers
 
-import "io/fs"
+import (
+	"io/fs"
+
+	"github.com/CodeIntelligenceTesting/gofuzz/sanitizers/detectors"
+)
 
 func FsFileInfoToDirEntry(hookId int, info fs.FileInfo) fs.DirEntry {
-	checkForPathTraversal(hookId, info.Name())
+	detectors.NewPathTraversal(hookId, info.Name()).Detect()
 	return fs.FileInfoToDirEntry(info)
 }
 
 func FsReadDir(hookId int, fsys fs.FS, name string) ([]fs.DirEntry, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return fs.ReadDir(fsys, name)
 }
 
 func FsReadFile(hookId int, fsys fs.FS, name string) ([]byte, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return fs.ReadFile(fsys, name)
 }
 
 func FsStat(hookId int, fsys fs.FS, name string) (fs.FileInfo, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return fs.Stat(fsys, name)
 }
 
 func FsSub(hookId int, fsys fs.FS, dir string) (fs.FS, error) {
-	checkForPathTraversal(hookId, dir)
+	detectors.NewPathTraversal(hookId, dir).Detect()
 	return fs.Sub(fsys, dir)
 }
 
 func FsWalkDir(hookId int, fsys fs.FS, root string, fn fs.WalkDirFunc) error {
-	checkForPathTraversal(hookId, root)
+	detectors.NewPathTraversal(hookId, root).Detect()
 	return fs.WalkDir(fsys, root, fn)
 }
 
 func FsOpen(hookId int, fsys fs.FS, name string) (fs.File, error) {
-	checkForPathTraversal(hookId, name)
+	detectors.NewPathTraversal(hookId, name).Detect()
 	return fsys.Open(name)
 }

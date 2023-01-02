@@ -1,4 +1,4 @@
-package sanitizers
+package reporter
 
 import (
 	"fmt"
