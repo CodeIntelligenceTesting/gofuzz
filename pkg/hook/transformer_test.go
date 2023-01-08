@@ -30,7 +30,6 @@ func TestTransformer(t *testing.T) { packagestest.TestAll(t, testTransformer) }
 
 func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 	hook.RegisterDefaultHooks()
-	hook.RegisterFunctionHook("Println", "fmt", "FakePrintln")
 
 	load := func(name string) string {
 		data, err := os.ReadFile(name)
