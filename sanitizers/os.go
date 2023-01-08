@@ -53,7 +53,7 @@ func OsCreateTemp(hookId int, dir, pattern string) (*os.File, error) {
 	return os.CreateTemp(dir, pattern)
 }
 
-func OsDirFs(hookId int, dir string) fs.FS {
+func OsDirFS(hookId int, dir string) fs.FS {
 	detectors.NewPathTraversal(hookId, dir).Detect()
 	return os.DirFS(dir)
 }
