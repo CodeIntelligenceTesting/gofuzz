@@ -14,17 +14,20 @@ import (
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/flagutil"
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/log"
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/sanitize"
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/sanitizers"
 	"github.com/CodeIntelligenceTesting/gofuzz/pkg/hook"
 )
 
 func New() *cobra.Command {
+	var disabledSanitizers sanitizers.Sanitizers
 	sanitizeCmd := &cobra.Command{
 		Use:   "sanitize package",
 		Short: "Add bug detection instrumentation.",
 		Long:  "Add bug detection instrumentation to packages named by the import paths, along with their dependencies.",
 		Args:  cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			hook.RegisterDefaultHooks()
+			hook.ClearHooks()
+			hook.RegisterDefaultHooks(disabledSanitizers)
 			hook.SetSanitizersPackagePath(viper.GetString("sanitizers_package_path"))
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -82,6 +85,9 @@ func New() *cobra.Command {
 		"github.com/CodeIntelligenceTesting/gofuzz/sanitizers",
 		"Package path of the sanitizers package")
 	flagutil.BindFlag("sanitizers_package_path", sanitizeCmd.PersistentFlags())
+
+	sanitizeCmd.PersistentFlags().VarP(&disabledSanitizers, "disabled_sanitizers", "d",
+		fmt.Sprintf("Set of sanitizers to disable. Possible values are: %s", strings.Join(sanitizers.AllSanitizers, ",")))
 
 	return sanitizeCmd
 }
