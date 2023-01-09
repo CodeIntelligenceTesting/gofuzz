@@ -12,10 +12,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/slices"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/packages/packagestest"
 
 	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/sanitize"
+	"github.com/CodeIntelligenceTesting/gofuzz/internal/pkg/sanitizers"
 	"github.com/CodeIntelligenceTesting/gofuzz/pkg/hook"
 )
 
@@ -29,8 +31,6 @@ func mockFakePC(n ast.Node, file string, fSet *token.FileSet) *ast.BasicLit {
 func TestTransformer(t *testing.T) { packagestest.TestAll(t, testTransformer) }
 
 func testTransformer(t *testing.T, exporter packagestest.Exporter) {
-	hook.RegisterDefaultHooks()
-
 	load := func(name string) string {
 		data, err := os.ReadFile(name)
 		if err != nil {
@@ -69,25 +69,59 @@ func testTransformer(t *testing.T, exporter packagestest.Exporter) {
 	})
 	defer exported.Cleanup()
 
-	exported.Config.Mode = sanitize.NeededLoadMode()
-	pkgs, err := packages.Load(exported.Config, "github.com/initial")
-	assert.NoError(t, err)
-	assert.NotNil(t, pkgs)
+	type test struct {
+		disabledSanitizers []string
+		preservedFiles     []string
+	}
 
-	for _, pkg := range pkgs {
-		for i, file := range pkg.Syntax {
-			origFile := filepath.Base(pkg.CompiledGoFiles[i])
+	tests := []test{
+		{
+			[]string{},
+			[]string{}},
+		{
+			[]string{sanitizers.CommandInjection},
+			[]string{"cmd.go"}},
+		{
+			[]string{sanitizers.PathTraversal},
+			[]string{"filepath.go", "fs.go", "open.go", "path.go"}},
+		{
+			[]string{sanitizers.CommandInjection, sanitizers.SQLInjection},
+			[]string{"cmd.go", "sql.go"}},
+		{
+			sanitizers.AllSanitizers,
+			[]string{"cmd.go", "filepath.go", "fs.go", "open.go", "path.go", "sql.go", "template.go"},
+		},
+	}
 
-			transformer := hook.NewTransformer(file, pkg.Fset, origFile, pkg.TypesInfo, mockFakePC)
-			transformed := transformer.TransformFile()
-			assert.Equal(t, transformed, transformed)
+	for _, tc := range tests {
+		hook.ClearHooks()
+		hook.RegisterDefaultHooks(tc.disabledSanitizers)
 
-			var after bytes.Buffer
-			err = format.Node(&after, pkg.Fset, file)
-			assert.NoError(t, err)
+		exported.Config.Mode = sanitize.NeededLoadMode()
+		pkgs, err := packages.Load(exported.Config, "github.com/initial")
+		assert.NoError(t, err)
+		assert.NotNil(t, pkgs)
 
-			transformedFile := exported.File("github.com/transformed", origFile)
-			assert.Equal(t, load(transformedFile), after.String())
+		for _, pkg := range pkgs {
+			for i, file := range pkg.Syntax {
+				origFile := filepath.Base(pkg.CompiledGoFiles[i])
+
+				transformer := hook.NewTransformer(file, pkg.Fset, origFile, pkg.TypesInfo, mockFakePC)
+				transformed := transformer.TransformFile()
+				assert.Equal(t, transformed, transformed)
+
+				var after bytes.Buffer
+				err = format.Node(&after, pkg.Fset, file)
+				assert.NoError(t, err)
+
+				var transformedFile string
+				if slices.Contains(tc.preservedFiles, origFile) {
+					transformedFile = exported.File("github.com/initial", origFile)
+				} else {
+					transformedFile = exported.File("github.com/transformed", origFile)
+				}
+				assert.Equal(t, load(transformedFile), after.String())
+			}
 		}
 	}
 }
